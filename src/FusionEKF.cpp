@@ -37,6 +37,28 @@ FusionEKF::FusionEKF() {
    * TODO: Set the process and measurement noises
    */
 
+  // Projection matrix from 4D to 2D space initialization
+  H_laser_ << 1, 0, 0, 0,
+              0, 1, 0, 0;
+
+  // Jacobian matrix initialization
+  Hj_ << 1, 1, 0, 0,
+         1, 1, 0, 0,
+         1, 1, 1, 1;
+
+  // State covariance matrix initialization
+  ekf_.P_ = MatrixXd(4, 4);
+  ekf_.P_ << 1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1000, 0,
+            0, 0, 0, 1000;
+
+  // state transition matrix initialization
+  ekf_.F_ = MatrixXd(4, 4);
+  ekf_.F_ << 1, 0, 1, 0,
+            0, 1, 0, 1,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
 
 }
 
