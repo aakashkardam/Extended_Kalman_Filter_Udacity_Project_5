@@ -144,7 +144,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   // initializing the sigma_ax_squared and sigma_ay_squared
   double noise_ax, noise_ay;
   noise_ax = 9.0;
-  noise_ay = 9.0
+  noise_ay = 9.0;
+
   // updating the Process Covariance noise matrix (Q)
   ekf_.Q_ = MatrixXd(4, 4);
   ekf_.Q_ << (pow(dt,4))*pow(noise_ax,1)/4, 0, (pow(dt,3))*pow(noise_ax,1)/2, 0,
@@ -167,10 +168,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // TODO: Radar updates
-
+    Hj_ = tools.CalculateJacobian(ekf_.x_);
+    ekf_.H_ = Hj_;
+    ekf_.R_ = R_radar_;
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
     // TODO: Laser updates
-
+    ekf_.H_ = H_laser_;
+    ekf_.R_ = R_laser_;
+    ekf_.Update(measurement_pack.raw_measurements_);
   }
 
   // print the output
