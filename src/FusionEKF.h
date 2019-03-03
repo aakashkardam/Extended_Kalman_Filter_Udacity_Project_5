@@ -21,6 +21,7 @@ class FusionEKF {
    */
   virtual ~FusionEKF();
 
+  double pow(double a, int b);
   /**
    * Run the whole flow of the Kalman Filter from here.
    */

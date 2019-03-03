@@ -37,7 +37,8 @@ FusionEKF::FusionEKF() {
    * TODO: Set the process and measurement noises
    */
 
-  // Projection matrix from 4D to 2D space initialization
+  // Projection matrix initialization
+  // (to project from 4D space to a 2D space)
   H_laser_ << 1, 0, 0, 0,
               0, 1, 0, 0;
 
@@ -60,6 +61,15 @@ FusionEKF::FusionEKF() {
             0, 0, 1, 0,
             0, 0, 0, 1;
 
+}
+
+// helper function to compute power
+double FusionEKF::pow(double a, int b) {
+  double prod = a;
+  for(int i=0; i<b; i++){
+    prod *= a;
+  }
+  return prod;
 }
 
 /**
@@ -124,7 +134,25 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    * TODO: Update the process noise covariance matrix.
    * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
+  double dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
+  previous_timestamp_ = measurement_pack.timestamp_;
 
+  // updating the state transition matrix F according to the new elapsed time
+  ekf_.F_(0,2) = dt;
+  ekf_.F_(1,3) = dt;
+
+  // initializing the sigma_ax_squared and sigma_ay_squared
+  double noise_ax, noise_ay;
+  noise_ax = 9.0;
+  noise_ay = 9.0
+  // updating the Process Covariance noise matrix (Q)
+  ekf_.Q_ = MatrixXd(4, 4);
+  ekf_.Q_ << (pow(dt,4))*pow(noise_ax,1)/4, 0, (pow(dt,3))*pow(noise_ax,1)/2, 0,
+           0, (pow(dt,4))*pow(noise_ay,1)/4, 0, (pow(dt,3))*pow(noise_ay,1)/2,
+           (pow(dt,3))*pow(noise_ax,1)/2, 0, (pow(dt,2))*pow(noise_ax,1), 0,
+           0, (pow(dt,3))*pow(noise_ay,1)/2, 0, (pow(dt,2))*pow(noise_ay,1);
+
+  // calling the predict function
   ekf_.Predict();
 
   /**
