@@ -71,6 +71,10 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   VectorXd h(3);
   h << rho, phi, rho_dot;
   VectorXd y = z - h;             // comparing the measurement with the prediction
+  while (y(1)> M_PI)
+    y(1)-=2.*M_PI;
+  while (y(1)<-M_PI)
+    y(1)+=2.*M_PI;
   MatrixXd Ht = H_.transpose();   // taking transpose of H
   MatrixXd S = H_ * P_ * Ht + R_; // projecting measurement uncertainty into the meaurement space
   MatrixXd Si = S.inverse();      // taking inverse of S
