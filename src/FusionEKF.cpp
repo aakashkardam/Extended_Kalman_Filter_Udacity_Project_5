@@ -147,12 +147,21 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   noise_ax = 9.0;
   noise_ay = 9.0;
 
+  // precalculation for Q elements
+  double dt2 = dt * dt;
+  double dt3 = dt2 * dt;
+  double dt4 = dt3 * dt;
   // updating the Process Covariance noise matrix (Q)
   ekf_.Q_ = MatrixXd(4, 4);
-  ekf_.Q_ << (pow(dt,4))*pow(noise_ax,1)/4, 0, (pow(dt,3))*pow(noise_ax,1)/2, 0,
-           0, (pow(dt,4))*pow(noise_ay,1)/4, 0, (pow(dt,3))*pow(noise_ay,1)/2,
-           (pow(dt,3))*pow(noise_ax,1)/2, 0, (pow(dt,2))*pow(noise_ax,1), 0,
-           0, (pow(dt,3))*pow(noise_ay,1)/2, 0, (pow(dt,2))*pow(noise_ay,1);
+  //ekf_.Q_ << (pow(dt,4))*pow(noise_ax,1)/4, 0, (pow(dt,3))*pow(noise_ax,1)/2, 0,
+  //         0, (pow(dt,4))*pow(noise_ay,1)/4, 0, (pow(dt,3))*pow(noise_ay,1)/2,
+  //         (pow(dt,3))*pow(noise_ax,1)/2, 0, (pow(dt,2))*pow(noise_ax,1), 0,
+  //         0, (pow(dt,3))*pow(noise_ay,1)/2, 0, (pow(dt,2))*pow(noise_ay,1);
+
+  ekf_.Q_ << dt4*noise_ax/4, 0, dt3*noise_ax/2, 0,
+           0, dt4*noise_ay/4, 0, dt3*noise_ay/2,
+           dt3*noise_ax/2, 0, dt2*noise_ax, 0,
+           0, dt3*noise_ay/2, 0, dt2*noise_ay;
 
   // calling the predict function
   ekf_.Predict();
